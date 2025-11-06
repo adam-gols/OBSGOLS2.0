@@ -55,14 +55,20 @@ export default defineConfig({
     }
   },
 
+  // Node.js polyfills for browser compatibility
+  define: {
+    global: 'globalThis',
+    __DEV__: process.env.NODE_ENV !== 'production',
+    __PROD__: process.env.NODE_ENV === 'production'
+  },
+
+  optimizeDeps: {
+    include: ['googleapis'],
+    exclude: ['googleapis/build/src/apis']
+  },
+
   // CSS configuration
   css: {
     devSourcemap: true
-  },
-
-  // Environment variables
-  define: {
-    __DEV__: process.env.NODE_ENV !== 'production',
-    __PROD__: process.env.NODE_ENV === 'production'
   }
 });

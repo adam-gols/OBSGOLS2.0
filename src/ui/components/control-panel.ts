@@ -29,7 +29,7 @@ export class ControlPanel {
     });
     
     this.bindEventListeners();
-    this.loadEvents();
+    // Note: Event loading is now handled by EventSelector component
     this.updateRecordingControls();
     
     // Listen for external events
@@ -71,7 +71,12 @@ export class ControlPanel {
     }
   }
 
+  // NOTE: Event loading is now handled by EventSelector component
+  // This method is disabled to prevent conflicts
   private async loadEvents(): Promise<void> {
+    // Disabled - EventSelector handles event loading
+    return;
+    /*
     try {
       this.logger.debug('Loading events for selector', {
         module: 'UI',
@@ -94,18 +99,27 @@ export class ControlPanel {
       }, error as Error);
       this.showError('Failed to load events');
     }
+    */
   }
 
-  private handleEventsLoaded(events: any[]): void {
+  private handleEventsLoaded(_events: any[]): void {
+    // Disabled - EventSelector handles event loading
+    return;
+    /*
     this.logger.debug('Events loaded', {
       module: 'UI',
       action: 'EVENTS_LOADED',
       data: { component: 'ControlPanel', eventCount: events.length }
     });
     this.populateEventSelector(events);
+    */
   }
 
-  private populateEventSelector(events: any[]): void {
+  // NOTE: This method is disabled - EventSelector handles dropdown population
+  private populateEventSelector(_events: any[]): void {
+    // Disabled - EventSelector handles event dropdown population
+    return;
+    /*
     const eventSelector = document.getElementById('event-selector') as HTMLSelectElement;
     if (!eventSelector) return;
 
@@ -125,6 +139,7 @@ export class ControlPanel {
     if (sessionState.lastSelectedEvent) {
       eventSelector.value = sessionState.lastSelectedEvent;
     }
+    */
   }
 
   private async handleEventChange(event: Event): Promise<void> {

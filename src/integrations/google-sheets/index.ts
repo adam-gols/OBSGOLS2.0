@@ -1,13 +1,65 @@
 /**
- * Google Sheets Integration Module
+ * Production Google Sheets integration for GOLS OBS Widget
+ * Main entry point for all Google Sheets functionality
  * 
- * Main entry point for Google Sheets functionality including:
- * - API client for Google Sheets operations (browser and Node.js compatible)
- * - Event sheet management and data processing
- * - Operations logging and audit trails
- * - Data transformation and formatting utilities
+ * Features:
+ * - HTTP API client that communicates with local Python service
+ * - File Cabinet management for event selection
+ * - Operations sheet management for game data and write-back
+ * - Site Info and Master Schedule data processing
+ * - Fallback to browser API client if Python service is unavailable
  */
 
+// Core HTTP API client (primary)
+export { HTTPGoogleSheetsClient, httpSheetsClient } from './http-api-client.js';
+
+// Fallback browser API client (primary export)
+export { BrowserGoogleSheetsApiClient as BrowserGoogleSheetsAPIClient } from './browser-api-client.js';
+
+// Legacy production client (for reference)
+export { ProductionGoogleSheetsClient } from './production-api-client.js';
+
+// Managers
+export { FileCabinetManager } from './file-cabinet-manager.js';
+export { OperationsManager } from './operations-manager.js';
+
+// Data processors  
+export { SiteInfoProcessor } from '../../data/processors/site-info-processor.js';
+export { ScheduleProcessor } from '../../data/processors/schedule-processor.js';
+
+// Types and interfaces
+export type { 
+  EventListItem, 
+  FileCabinetData 
+} from './file-cabinet-manager.js';
+
+export type { 
+  SiteInfo, 
+  GameData, 
+  OperationsData 
+} from './operations-manager.js';
+
+export type {
+  ProcessedSiteInfo,
+  SiteInfoProcessingResult
+} from '../../data/processors/site-info-processor.js';
+
+export type {
+  ProcessedGameData,
+  ScheduleProcessingResult  
+} from '../../data/processors/schedule-processor.js';
+
+// Configuration and credentials
+export { 
+  PRODUCTION_SHEETS_CONFIG,
+  PRODUCTION_CONFIG,
+  getProductionCredentials,
+  validateCredentials,
+  getFileCabinetUrl,
+  extractSpreadsheetId
+} from '../../utils/production-credentials.js';
+
+// Legacy exports for compatibility (deprecated)
 export { GoogleSheetsApiClient } from './api-client.js';
 export { BrowserGoogleSheetsApiClient } from './browser-api-client.js';
 export { EventSheetManager } from './event-sheet-manager.js';

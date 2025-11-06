@@ -143,36 +143,40 @@ Develop a production-ready OBS Studio widget for Game On Live Studio that provid
 
 ### Step 3: Google Sheets Integration Module
 - **Owner:** You (Claude)
-- **Goal:** Implement complete Google Sheets API integration for File Cabinet and OPS sheets
+- **Goal:** Implement production-ready Google Sheets API integration with embedded static credentials for all users
 - **Actions (what you will do):**
-  - Create `GoogleSheetsAPI` class with service account authentication
-  - Implement `FileCabinetManager` for event list management
-  - Build `OpsSheetManager` for operations sheet processing
+  - Create `GoogleSheetsAPI` class with embedded static service account credentials
+  - Implement `FileCabinetManager` for event list management with hardcoded sheet access
+  - Build `OpsSheetManager` for operations sheet processing with write capabilities
   - Create data processors for Site Info and Master Schedule tabs
-  - Implement real-time data polling with error handling
-  - Add circuit breaker pattern for API reliability
+  - Implement real-time data polling with error handling and circuit breaker
+  - Embed production Google service account credentials directly in code (obfuscated)
+  - Add automatic sheet permissions validation and setup
 - **Inputs/Dependencies (what you need):**
   - Step 2 core system completed
-  - Google service account credentials (user to provide)
-  - File Cabinet URL and structure specification
+  - Production Google service account credentials (embedded statically)
+  - File Cabinet URL and structure specification (hardcoded)
 - **Deliverables (what you will produce):**
-  - `src/integrations/google-sheets/sheets-api.ts` - Core API client
-  - `src/integrations/google-sheets/file-cabinet.ts` - Event management
-  - `src/integrations/google-sheets/ops-sheet.ts` - Operations sheet handling
+  - `src/integrations/google-sheets/production-api-client.ts` - Production API client with embedded credentials
+  - `src/integrations/google-sheets/file-cabinet-manager.ts` - Event management with static configuration
+  - `src/integrations/google-sheets/operations-manager.ts` - Operations sheet handling with write-back
   - `src/data/processors/site-info-processor.ts` - Site Info data processing
   - `src/data/processors/schedule-processor.ts` - Master Schedule processing
-  - `src/data/models/` - TypeScript interfaces for all data structures
+  - `src/data/models/` - Complete TypeScript interfaces for all data structures
+  - `src/utils/credentials.ts` - Embedded credential management (obfuscated)
 - **Testing & Validation Plan (how you will verify it):**
-  - Service account authentication succeeds
-  - File Cabinet data loads and parses correctly
-  - Event selection triggers OPS sheet loading
+  - Static credentials authenticate successfully without user setup
+  - File Cabinet data loads and parses correctly with hardcoded configuration
+  - Event selection triggers OPS sheet loading automatically
   - Site Info data processes with correct format transformations
   - Master Schedule games filter by site stream accurately
-  - Circuit breaker activates on API failures
+  - Write operations to OPS sheets function correctly
+  - Circuit breaker activates on API failures and recovers automatically
 - **Risks & Mitigations:**
-  - Risk: Google API rate limits → Mitigation: Request throttling and circuit breaker
-  - Risk: Authentication failures → Mitigation: Clear error messages and retry logic
-  - Risk: Data format changes → Mitigation: Robust parsing with validation
+  - Risk: Google API rate limits → Mitigation: Request throttling, circuit breaker, and shared quota management
+  - Risk: Credential exposure → Mitigation: Base64 obfuscation and production-only credentials with minimal permissions
+  - Risk: Sheet permission issues → Mitigation: Automatic validation and clear error messages
+  - Risk: Data format changes → Mitigation: Robust parsing with validation and fallback schemas
 
 ### Step 4: User Interface Components
 - **Owner:** You (Claude)
@@ -467,12 +471,12 @@ Develop a production-ready OBS Studio widget for Game On Live Studio that provid
 ## 7. Next Steps & Open Questions
 
 ### Required User Inputs
-1. **Google Service Account Credentials**: `service-account.json` file for Google Sheets API access
-   - **Default Recommendation**: Proceed with mock data until credentials provided
+1. **Production Google Service Account**: Static credentials embedded in code for all users
+   - **Default Recommendation**: Use embedded production credentials with read/write access to designated sheets
 2. **Singular Live Configuration**: API endpoint URL and private token
    - **Default Recommendation**: Build integration with disabled state, enable when configured
-3. **File Cabinet URL Confirmation**: Verify default URL or provide custom one
-   - **Default Recommendation**: Use spec-provided URL, allow override in settings
+3. **File Cabinet URL**: Hardcoded production sheet URL with automatic access
+   - **Default Recommendation**: Use embedded production File Cabinet URL with static credentials
 
 ### Configuration Decisions
 1. **Debug Logging Level**: Verbose console output for development

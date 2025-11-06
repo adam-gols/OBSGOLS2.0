@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOLS Event Selector Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        select {
+            padding: 8px;
+            margin: 10px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 10px;
+            background: #C62128;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #A01A20;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #333;
+            border-radius: 4px;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .info { border-left: 4px solid #2196F3; }
+    </style>
+</head>
+<body>
+    <h1>🎮 GOLS Event Selector Test</h1>
+    
+    <div class="status info">
+        <p><strong>Testing event dropdown population from File Cabinet</strong></p>
+        <p>Python service should be running on http://localhost:8080</p>
+    </div>
+
+    <div>
+        <label for="event-selector">Select Event:</label>
+        <select id="event-selector">
+            <option value="">Select an event...</option>
+        </select>
+        <button id="refresh-events">🔄 Refresh Events</button>
+    </div>
+
+    <div>
+        <p><strong>Game Counter:</strong> <span id="game-counter">0 / 0</span></p>
+        <button id="prev-game">⏪ Previous Game</button>
+        <button id="next-game">⏩ Next Game</button>
+    </div>
+
+    <div id="game-info" style="margin-top: 20px;">
+        <h3>Current Game</h3>
+        <div id="game-details">No game selected</div>
+    </div>
+
+    <div id="status-log" class="status info">
+        <h4>Status Log:</h4>
+        <div id="log-messages"></div>
+    </div>
+
+    <script type="module">
+        // Simple test of the HTTP client without the full UI framework
+        
+        class SimpleEventTest {
+            constructor() {
+                this.events = [];
+                this.currentEvent = null;
+                this.currentGameIndex = 0;
+                this.logMessages = document.getElementById('log-messages');
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.log('Initializing event selector test...');
+                this.loadEvents();
+            }
+
+            bindEvents() {
+                document.getElementById('refresh-events').addEventListener('click', () => {
+                    this.loadEvents();
+                });
+
+                document.getElementById('event-selector').addEventListener('change', (e) => {
+                    this.selectEvent(e.target.value);
+                });
+
+                document.getElementById('prev-game').addEventListener('click', () => {
+                    this.previousGame();
+                });
+
+                document.getElementById('next-game').addEventListener('click', () => {
+                    this.nextGame();
+                });
+            }
+
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logElement = document.createElement('div');
+                logElement.innerHTML = `<span style="color: #666;">[${timestamp}]</span> ${message}`;
+                this.logMessages.appendChild(logElement);
+                this.logMessages.scrollTop = this.logMessages.scrollHeight;
+                console.log(`[${timestamp}] ${message}`);
+            }
+
+            async loadEvents() {
+                try {
+                    this.log('Loading events from File Cabinet...', 'info');
+                    
+                    // Test health first
+                    const healthResponse = await fetch('http://localhost:8080/health');
+                    const health = await healthResponse.json();
+                    
+                    if (!health.status === 'healthy') {
+                        throw new Error('Python service is not healthy');
+                    }
+                    
+                    // Load events
+                    const eventsResponse = await fetch('http://localhost:8080/events');
+                    const eventsData = await eventsResponse.json();
+                    
+                    if (!eventsData.success) {
+                        throw new Error(eventsData.error || 'Failed to load events');
+                    }
+                    
+                    this.events = eventsData.data;
+                    this.updateEventSelector();
+                    
+                    this.log(`✅ Loaded ${this.events.length} events successfully`, 'success');
+                    this.events.forEach(event => {
+                        this.log(`  📋 ${event.name}`, 'info');
+                    });
+                    
+                } catch (error) {
+                    this.log(`❌ Failed to load events: ${error.message}`, 'error');
+                }
+            }
+
+            updateEventSelector() {
+                const selector = document.getElementById('event-selector');
+                
+                // Clear existing options except the first placeholder
+                while (selector.children.length > 1) {
+                    selector.removeChild(selector.lastChild);
+                }
+                
+                // Add event options
+                this.events.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.ops_sheet_id;
+                    option.textContent = event.name;
+                    selector.appendChild(option);
+                });
+            }
+
+            async selectEvent(eventId) {
+                if (!eventId) {
+                    this.currentEvent = null;
+                    this.updateGameDisplay();
+                    return;
+                }
+                
+                const event = this.events.find(e => e.ops_sheet_id === eventId);
+                if (!event) return;
+                
+                try {
+                    this.log(`🎯 Loading games for event: ${event.name}`, 'info');
+                    
+                    const response = await fetch(`http://localhost:8080/operations/${eventId}`);
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        throw new Error(data.error || 'Failed to load games');
+                    }
+                    
+                    const games = data.data.master_schedule;
+                    this.currentEvent = { ...event, games };
+                    this.currentGameIndex = 0;
+                    
+                    this.log(`✅ Loaded ${games.length} games for ${event.name}`, 'success');
+                    this.updateGameDisplay();
+                    
+                } catch (error) {
+                    this.log(`❌ Failed to load games: ${error.message}`, 'error');
+                }
+            }
+
+            updateGameDisplay() {
+                const counter = document.getElementById('game-counter');
+                const gameDetails = document.getElementById('game-details');
+                
+                if (!this.currentEvent || !this.currentEvent.games) {
+                    counter.textContent = '0 / 0';
+                    gameDetails.innerHTML = 'No event selected';
+                    return;
+                }
+                
+                const games = this.currentEvent.games;
+                counter.textContent = `${this.currentGameIndex + 1} / ${games.length}`;
+                
+                if (games.length === 0) {
+                    gameDetails.innerHTML = 'No games in this event';
+                    return;
+                }
+                
+                const currentGame = games[this.currentGameIndex];
+                gameDetails.innerHTML = `
+                    <strong>Game #${currentGame['GAME#'] || 'N/A'}</strong><br>
+                    <strong>Teams:</strong> ${currentGame.WHITE || 'TBD'} vs ${currentGame.DARK || 'TBD'}<br>
+                    <strong>Time:</strong> ${currentGame.DATE} ${currentGame.TIME}<br>
+                    <strong>Location:</strong> ${currentGame.LOCATION || 'TBD'}<br>
+                    <strong>Division:</strong> ${currentGame.DIVISION || 'N/A'}<br>
+                    <strong>Score:</strong> ${currentGame.S || '0'}<br>
+                    <strong>Status:</strong> ${currentGame['ACTUAL START TIME'] ? '✅ Started' : '⏳ Pending'}
+                `;
+            }
+
+            previousGame() {
+                if (!this.currentEvent || !this.currentEvent.games) return;
+                
+                if (this.currentGameIndex > 0) {
+                    this.currentGameIndex--;
+                    this.updateGameDisplay();
+                    this.log(`⏪ Moved to game ${this.currentGameIndex + 1}`, 'info');
+                }
+            }
+
+            nextGame() {
+                if (!this.currentEvent || !this.currentEvent.games) return;
+                
+                if (this.currentGameIndex < this.currentEvent.games.length - 1) {
+                    this.currentGameIndex++;
+                    this.updateGameDisplay();
+                    this.log(`⏩ Moved to game ${this.currentGameIndex + 1}`, 'info');
+                }
+            }
+        }
+
+        // Start the test
+        new SimpleEventTest();
+    </script>
+</body>
+</html>

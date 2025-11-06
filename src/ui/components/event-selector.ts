@@ -1,6 +1,7 @@
 import { EventManager } from '../../core/event-manager';
 import { SettingsManager } from '../../core/settings-manager';
 import { Logger } from '../../utils/logger';
+import { httpSheetsClient, type EventData } from '../../integrations/google-sheets/http-api-client';
 import type { EventInfo, GameInfo } from '../../data/event-data-manager';
 
 export class EventSelector {
@@ -19,23 +20,110 @@ export class EventSelector {
     this.eventManager = eventManager;
     this.logger = logger;
     
-    this.initialize();
+    // Don't initialize immediately - wait for DOM to be ready
+    // this.initialize();
   }
 
-  private initialize(): void {
+  public async start(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+    await this.initialize();
+  }
+
+  private async initialize(): Promise<void> {
     this.logger.debug('Initializing Event Selector', {
       module: 'UI',
       action: 'INIT',
       data: { component: 'EventSelector' }
     });
     
+    console.log('🚀 EventSelector: Initializing...');
+    
     this.bindEventListeners();
     this.setupEventManagerListeners();
     
-    // Add some sample data for testing
-    this.addSampleData();
+    // Wait a bit to ensure DOM is fully ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Load real events from File Cabinet
+    await this.loadEventsFromFileCabinet();
     
     this.isInitialized = true;
+    console.log('✅ EventSelector: Initialized successfully');
+  }
+
+  private async loadEventsFromFileCabinet(): Promise<void> {
+    try {
+      console.log('🔍 EventSelector: Starting to load events from File Cabinet...');
+      
+      this.logger.debug('Loading events from File Cabinet', {
+        module: 'UI',
+        action: 'LOAD_EVENTS',
+        data: { component: 'EventSelector' }
+      });
+
+      // Check if the HTTP service is healthy
+      console.log('🏥 EventSelector: Checking service health...');
+      const healthStatus = await httpSheetsClient.getHealthStatus();
+      console.log('🏥 EventSelector: Health status:', healthStatus);
+      
+      if (!healthStatus.healthy) {
+        this.logger.error('HTTP Sheets service is not available', {
+          module: 'UI',
+          action: 'LOAD_EVENTS_ERROR',
+          data: { component: 'EventSelector', error: 'Service unhealthy' }
+        });
+        this.addSampleData(); // Fallback to sample data
+        return;
+      }
+
+      // Load events from the File Cabinet
+      console.log('📋 EventSelector: Loading events from File Cabinet...');
+      const eventData: EventData[] = await httpSheetsClient.getEvents();
+      console.log('📋 EventSelector: Received events:', eventData);
+      
+      // Convert EventData to EventInfo format
+      this.events = eventData.map(event => ({
+        id: event.ops_sheet_id,
+        name: event.name,
+        date: event.date || 'TBD',
+        status: 'upcoming' as const,
+        games: [] // Games will be loaded when event is selected
+      }));
+
+      console.log('📋 EventSelector: Converted events:', this.events);
+
+      // Delay the update to ensure DOM is fully ready
+      setTimeout(() => {
+        this.updateEventSelector();
+      }, 100);
+      
+      console.log('✅ EventSelector: Events loaded and update scheduled');
+      
+      this.logger.debug('Events loaded successfully', {
+        module: 'UI',
+        action: 'EVENTS_LOADED',
+        data: { 
+          component: 'EventSelector', 
+          eventCount: this.events.length,
+          events: this.events.map(e => e.name)
+        }
+      });
+
+    } catch (error) {
+      this.logger.error('Failed to load events from File Cabinet', {
+        module: 'UI',
+        action: 'LOAD_EVENTS_ERROR',
+        data: { 
+          component: 'EventSelector', 
+          error: error instanceof Error ? error.message : String(error) 
+        }
+      });
+      
+      // Fallback to sample data
+      this.addSampleData();
+    }
   }
 
   private addSampleData(): void {
@@ -133,7 +221,7 @@ export class EventSelector {
     this.eventManager.on('events:error', this.handleEventsError.bind(this));
   }
 
-  private handleEventSelection(event: Event): void {
+  private async handleEventSelection(event: Event): Promise<void> {
     const target = event.target as HTMLSelectElement;
     const eventId = target.value;
 
@@ -150,6 +238,68 @@ export class EventSelector {
       data: { component: 'EventSelector', eventId }
     });
 
+    // Find the selected event
+    const selectedEvent = this.events.find(e => e.id === eventId);
+    if (!selectedEvent) {
+      this.logger.error('Selected event not found', {
+        module: 'UI',
+        action: 'EVENT_SELECTION_ERROR',
+        data: { component: 'EventSelector', eventId }
+      });
+      return;
+    }
+
+    try {
+      // Load games from the operations sheet
+      const operationsData = await httpSheetsClient.getOperationsData(eventId);
+      
+      // Convert Master Schedule data to GameInfo format
+      const games: GameInfo[] = operationsData.master_schedule.map((game: any, index: number) => ({
+        id: `${eventId}-game-${index}`,
+        homeTeam: game.WHITE || 'Home Team',
+        awayTeam: game.DARK || 'Away Team',
+        homeScore: parseInt(game.S) || 0,
+        awayScore: 0, // Only one score field in the data
+        status: game['ACTUAL START TIME'] ? 'completed' : 'upcoming',
+        startTime: `${game.DATE} ${game.TIME}`,
+        location: game.LOCATION || 'TBD',
+        // Additional fields from the sheet
+        gameNumber: game['GAME#'],
+        division: game.DIVISION,
+        comments: game.COMMENTS,
+        actualStartTime: game['ACTUAL START TIME']
+      }));
+
+      // Update the event with games
+      selectedEvent.games = games;
+      this.currentEvent = selectedEvent;
+      this.currentGame = games.length > 0 ? games[0] || null : null;
+
+      this.updateGameDisplay();
+
+      this.logger.debug('Games loaded for event', {
+        module: 'UI',
+        action: 'GAMES_LOADED',
+        data: { 
+          component: 'EventSelector', 
+          eventId, 
+          gameCount: games.length,
+          eventName: selectedEvent.name
+        }
+      });
+
+    } catch (error) {
+      this.logger.error('Failed to load games for event', {
+        module: 'UI',
+        action: 'LOAD_GAMES_ERROR',
+        data: { 
+          component: 'EventSelector', 
+          eventId,
+          error: error instanceof Error ? error.message : String(error)
+        }
+      });
+    }
+
     // Emit event selection
     this.eventManager.emit('event:selected', { eventId });
   }
@@ -164,7 +314,12 @@ export class EventSelector {
     // Show loading state
     this.setRefreshButtonLoading(true);
 
-    // Emit refresh request
+    // Reload events from File Cabinet
+    this.loadEventsFromFileCabinet().finally(() => {
+      this.setRefreshButtonLoading(false);
+    });
+
+    // Also emit refresh request for other components
     this.eventManager.emit('events:refresh');
   }
 
@@ -252,21 +407,37 @@ export class EventSelector {
   }
 
   private updateEventSelector(): void {
+    console.log('🎯 EventSelector: Updating event selector dropdown...');
+    
     const eventSelector = document.getElementById('event-selector') as HTMLSelectElement;
-    if (!eventSelector) return;
-
-    // Clear existing options except the first placeholder
-    while (eventSelector.children.length > 1) {
-      eventSelector.removeChild(eventSelector.lastChild!);
+    if (!eventSelector) {
+      console.error('❌ EventSelector: event-selector element not found in DOM');
+      return;
     }
+
+    console.log('✅ EventSelector: Found event-selector element');
+
+    // Clear all existing options
+    eventSelector.innerHTML = '';
+
+    console.log('🗑️ EventSelector: Cleared all existing options');
+
+    // Add default placeholder option
+    const placeholderOption = document.createElement('option');
+    placeholderOption.value = '';
+    placeholderOption.textContent = 'Select an event...';
+    eventSelector.appendChild(placeholderOption);
 
     // Add event options
     this.events.forEach(event => {
       const option = document.createElement('option');
       option.value = event.id;
-      option.textContent = `${event.name} (${event.date})`;
+      option.textContent = event.name; // Show just the event name
       eventSelector.appendChild(option);
+      console.log(`➕ EventSelector: Added option: ${event.name} (${event.id})`);
     });
+
+    console.log(`✅ EventSelector: Added ${this.events.length} event options`);
 
     this.logger.debug('Event selector updated', {
       module: 'UI',

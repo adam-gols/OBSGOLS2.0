@@ -59,7 +59,7 @@ export class UIManager {
       console.log('🎯 Template loaded, initializing components...');
       
       // Initialize all UI components
-      this.initializeComponents();
+      await this.initializeComponents();
       
       console.log('🎮 Components initialized, binding events...');
       
@@ -295,7 +295,7 @@ export class UIManager {
     });
   }
 
-  private initializeComponents(): void {
+  private async initializeComponents(): Promise<void> {
     this.logger.debug('Initializing UI components', {
       module: 'UI',
       action: 'INIT_COMPONENTS'
@@ -350,6 +350,12 @@ export class UIManager {
         module: 'UI',
         action: 'COMPONENTS_READY'
       });
+
+      // Start components that need DOM to be ready
+      console.log('🔗 Starting components that require DOM...');
+      if (this.eventSelector) {
+        await this.eventSelector.start();
+      }
 
     } catch (error) {
       this.logger.error('Failed to initialize UI components', {

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test HTTP Client</title>
+</head>
+<body>
+    <h1>Test HTTP Client Connection</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testHttpClient() {
+            const results = document.getElementById('results');
+            
+            try {
+                results.innerHTML += '<p>Testing health endpoint...</p>';
+                
+                const healthResponse = await fetch('http://localhost:8081/health');
+                const healthData = await healthResponse.json();
+                
+                results.innerHTML += `<p>Health: ${JSON.stringify(healthData)}</p>`;
+                
+                results.innerHTML += '<p>Testing events endpoint...</p>';
+                
+                const eventsResponse = await fetch('http://localhost:8081/events');
+                const eventsData = await eventsResponse.json();
+                
+                results.innerHTML += `<p>Events count: ${eventsData.count}</p>`;
+                results.innerHTML += `<p>Event names: ${eventsData.data.map(e => e.name).join(', ')}</p>`;
+                
+            } catch (error) {
+                results.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Start test when page loads
+        document.addEventListener('DOMContentLoaded', testHttpClient);
+    </script>
+</body>
+</html>
