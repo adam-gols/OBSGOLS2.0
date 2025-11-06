@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game On Live Studio - OBS Widget</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    /* Base styles for OBS Browser Source compatibility */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background-color: transparent;
+      font-family: 'Roboto', 'Arial', sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+    
+    #gols-widget {
+      width: 450px;
+      height: 380px;
+      position: relative;
+      overflow: hidden;
+      contain: layout style paint;
+      background: white;
+    }
+    
+    /* Loading state */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #C62128;
+      font-size: 18px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div id="gols-widget">
+    <div class="loading">Loading Game On Live Studio Widget...</div>
+  </div>
+  
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

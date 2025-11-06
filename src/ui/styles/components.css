@@ -1,0 +1,847 @@
+/**
+ * GOLS Widget Component Styles
+ * Complete UI styling for Game On Live Studio OBS Widget
+ */
+
+/* Layout and Structure */
+.gols-widget {
+  font-family: var(--gols-font-primary);
+  background: var(--gols-gallery-grey);
+  color: var(--gols-black);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Header Styles */
+.gols-header {
+  background: linear-gradient(135deg, var(--gols-zodiac-blue) 0%, var(--gols-cardinal-red) 100%);
+  color: white;
+  padding: var(--gols-spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--gols-shadow-md);
+  position: relative;
+  z-index: 100;
+}
+
+.gols-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--gols-spacing-sm);
+}
+
+.gols-logo-image {
+  height: 32px;
+  width: auto;
+}
+
+.gols-logo-text {
+  font-family: var(--gols-font-secondary);
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gols-connection-status {
+  display: flex;
+  align-items: center;
+  gap: var(--gols-spacing-sm);
+}
+
+.gols-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--gols-spacing-xs);
+  padding: var(--gols-spacing-xs) var(--gols-spacing-sm);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--gols-radius-md);
+  backdrop-filter: blur(10px);
+}
+
+.gols-status-indicator.connected {
+  color: var(--gols-success);
+}
+
+.gols-status-indicator.disconnected {
+  color: var(--gols-error);
+}
+
+.gols-status-indicator.connecting {
+  color: var(--gols-warning);
+}
+
+.gols-status-indicator i {
+  animation: pulse 2s infinite;
+}
+
+.gols-status-indicator.connected i {
+  animation: none;
+}
+
+/* Main Content Area */
+.gols-main {
+  flex: 1;
+  padding: var(--gols-spacing-lg);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gols-spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Control Panel Styles */
+.gols-control-panel {
+  background: white;
+  border-radius: var(--gols-radius-lg);
+  padding: var(--gols-spacing-lg);
+  box-shadow: var(--gols-shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gols-spacing-lg);
+}
+
+.gols-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gols-spacing-sm);
+}
+
+.gols-label {
+  display: flex;
+  align-items: center;
+  gap: var(--gols-spacing-xs);
+  font-weight: 500;
+  color: var(--gols-zodiac-blue);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gols-label i {
+  color: var(--gols-cardinal-red);
+}
+
+/* Form Controls */
+.gols-select,
+.gols-input,
+.gols-textarea {
+  width: 100%;
+  padding: var(--gols-spacing-sm) var(--gols-spacing-md);
+  border: 2px solid var(--gols-pumice-grey);
+  border-radius: var(--gols-radius-md);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: var(--gols-transition-fast);
+  background: white;
+}
+
+.gols-select:focus,
+.gols-input:focus,
+.gols-textarea:focus {
+  outline: none;
+  border-color: var(--gols-cardinal-red);
+  box-shadow: 0 0 0 3px rgba(198, 33, 40, 0.1);
+}
+
+.gols-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Button Styles */
+.gols-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gols-spacing-xs);
+  padding: var(--gols-spacing-sm) var(--gols-spacing-md);
+  border: none;
+  border-radius: var(--gols-radius-md);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: var(--gols-transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.gols-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gols-button-primary {
+  background: var(--gols-cardinal-red);
+  color: white;
+}
+
+.gols-button-primary:hover:not(:disabled) {
+  background: #a11b21;
+  transform: translateY(-1px);
+  box-shadow: var(--gols-shadow-md);
+}
+
+.gols-button-secondary {
+  background: var(--gols-pumice-grey);
+  color: var(--gols-zodiac-blue);
+}
+
+.gols-button-secondary:hover:not(:disabled) {
+  background: #b0b2b0;
+  transform: translateY(-1px);
+}
+
+.gols-button-danger {
+  background: var(--gols-error);
+  color: white;
+}
+
+.gols-button-danger:hover:not(:disabled) {
+  background: #a11b21;
+}
+
+.gols-button-ghost {
+  background: transparent;
+  color: currentColor;
+  border: 1px solid currentColor;
+}
+
+.gols-button-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Event Selector */
+.gols-event-selector {
+  display: flex;
+  gap: var(--gols-spacing-sm);
+}
+
+.gols-event-selector .gols-select {
+  flex: 1;
+}
+
+.gols-event-selector .gols-button {
+  flex-shrink: 0;
+  width: 40px;
+  padding: var(--gols-spacing-sm);
+}
+
+/* Recording Controls */
+.gols-recording-controls {
+  display: flex;
+  gap: var(--gols-spacing-sm);
+  align-items: center;
+}
+
+.gols-recording-time {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--gols-cardinal-red);
+  background: rgba(198, 33, 40, 0.1);
+  padding: var(--gols-spacing-xs) var(--gols-spacing-sm);
+  border-radius: var(--gols-radius-sm);
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Game Navigator Styles */
+.gols-game-navigator {
+  background: white;
+  border-radius: var(--gols-radius-lg);
+  padding: var(--gols-spacing-lg);
+  box-shadow: var(--gols-shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gols-spacing-lg);
+}
+
+.gols-navigator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gols-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--gols-spacing-sm);
+  margin: 0;
+  font-family: var(--gols-font-secondary);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--gols-zodiac-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gols-section-title i {
+  color: var(--gols-cardinal-red);
+}
+
+.gols-game-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--gols-spacing-xs);
+}
+
+.gols-current-game {
+  font-weight: 500;
+  color: var(--gols-zodiac-blue);
+}
+
+.gols-game-counter {
+  font-size: 0.9rem;
+  color: var(--gols-pumice-grey);
+}
+
+.gols-navigator-controls {
+  display: flex;
+  gap: var(--gols-spacing-sm);
+}
+
+/* Game Card Styles */
+.gols-game-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid var(--gols-pumice-grey);
+  border-radius: var(--gols-radius-lg);
+  padding: var(--gols-spacing-lg);
+  transition: var(--gols-transition-normal);
+}
+
+.gols-game-header {
+  margin-bottom: var(--gols-spacing-md);
+}
+
+.gols-teams {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--gols-spacing-md);
+  gap: var(--gols-spacing-lg);
+}
+
+.gols-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gols-spacing-xs);
+  flex: 1;
+  max-width: 150px;
+}
+
+.gols-team-name {
+  font-family: var(--gols-font-secondary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--gols-zodiac-blue);
+}
+
+.gols-team-score {
+  font-family: var(--gols-font-secondary);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gols-cardinal-red);
+  text-align: center;
+  background: white;
+  border-radius: var(--gols-radius-md);
+  padding: var(--gols-spacing-sm) var(--gols-spacing-md);
+  min-width: 60px;
+  box-shadow: var(--gols-shadow-sm);
+}
+
+.gols-vs {
+  font-family: var(--gols-font-secondary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gols-pumice-grey);
+  text-transform: uppercase;
+}
+
+.gols-game-status {
+  text-align: center;
+  padding: var(--gols-spacing-xs) var(--gols-spacing-md);
+  border-radius: var(--gols-radius-md);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+}
+
+.gols-game-status.upcoming {
+  background: var(--gols-info);
+  color: white;
+}
+
+.gols-game-status.live {
+  background: var(--gols-error);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.gols-game-status.completed {
+  background: var(--gols-success);
+  color: white;
+}
+
+.gols-game-status.cancelled {
+  background: var(--gols-pumice-grey);
+  color: var(--gols-zodiac-blue);
+}
+
+.gols-game-meta {
+  display: flex;
+  justify-content: space-around;
+  margin-top: var(--gols-spacing-md);
+  padding-top: var(--gols-spacing-md);
+  border-top: 1px solid var(--gols-pumice-grey);
+}
+
+.gols-meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--gols-spacing-xs);
+  font-size: 0.9rem;
+  color: var(--gols-zodiac-blue);
+}
+
+.gols-meta-item i {
+  color: var(--gols-cardinal-red);
+}
+
+/* Score Editor */
+.gols-score-editor {
+  margin-top: var(--gols-spacing-md);
+  padding-top: var(--gols-spacing-md);
+  border-top: 2px solid var(--gols-pumice-grey);
+}
+
+.gols-score-controls {
+  display: flex;
+  gap: var(--gols-spacing-md);
+  align-items: end;
+}
+
+.gols-score-input {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gols-spacing-xs);
+}
+
+.gols-score-input label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--gols-zodiac-blue);
+}
+
+.gols-score-input input {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Settings Panel */
+.gols-settings-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 3px solid var(--gols-cardinal-red);
+  box-shadow: var(--gols-shadow-lg);
+  transform: translateY(calc(100% - 60px));
+  transition: var(--gols-transition-normal);
+  z-index: 200;
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+.gols-settings-panel.expanded {
+  transform: translateY(0);
+}
+
+.gols-settings-header {
+  padding: var(--gols-spacing-md) var(--gols-spacing-lg);
+  background: var(--gols-gallery-grey);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.gols-settings-content {
+  padding: var(--gols-spacing-lg);
+  max-height: calc(80vh - 60px);
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--gols-spacing-lg);
+}
+
+.gols-settings-group {
+  background: var(--gols-gallery-grey);
+  padding: var(--gols-spacing-lg);
+  border-radius: var(--gols-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gols-spacing-md);
+}
+
+.gols-settings-group-title {
+  margin: 0 0 var(--gols-spacing-sm) 0;
+  font-family: var(--gols-font-secondary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gols-zodiac-blue);
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--gols-cardinal-red);
+  padding-bottom: var(--gols-spacing-xs);
+}
+
+.gols-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gols-spacing-xs);
+}
+
+/* Checkbox Styles */
+.gols-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--gols-spacing-sm);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.gols-checkbox {
+  display: none;
+}
+
+.gols-checkbox-indicator {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gols-pumice-grey);
+  border-radius: var(--gols-radius-sm);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--gols-transition-fast);
+}
+
+.gols-checkbox:checked + .gols-checkbox-indicator {
+  background: var(--gols-cardinal-red);
+  border-color: var(--gols-cardinal-red);
+}
+
+.gols-checkbox:checked + .gols-checkbox-indicator::after {
+  content: '✓';
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.gols-settings-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  padding-top: var(--gols-spacing-lg);
+  border-top: 2px solid var(--gols-pumice-grey);
+}
+
+/* Notification Styles */
+.gols-notifications {
+  position: fixed;
+  top: var(--gols-spacing-lg);
+  right: var(--gols-spacing-lg);
+  z-index: 1000;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.gols-notification {
+  background: white;
+  border-radius: var(--gols-border-radius-md);
+  box-shadow: var(--gols-shadow-lg);
+  margin-bottom: var(--gols-spacing-md);
+  overflow: hidden;
+  position: relative;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
+  pointer-events: auto;
+  border-left: 4px solid var(--gols-grey);
+}
+
+.gols-notification-show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.gols-notification-hide {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.gols-notification-success {
+  border-left-color: var(--gols-success-color, #22c55e);
+}
+
+.gols-notification-error {
+  border-left-color: var(--gols-cardinal-red);
+}
+
+.gols-notification-warning {
+  border-left-color: var(--gols-warning-color, #f59e0b);
+}
+
+.gols-notification-info {
+  border-left-color: var(--gols-zodiac-blue);
+}
+
+.gols-notification-content {
+  display: flex;
+  align-items: flex-start;
+  padding: var(--gols-spacing-md);
+  gap: var(--gols-spacing-sm);
+}
+
+.gols-notification-icon {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  margin-top: 2px;
+}
+
+.gols-notification-success .gols-notification-icon {
+  color: var(--gols-success-color, #22c55e);
+}
+
+.gols-notification-error .gols-notification-icon {
+  color: var(--gols-cardinal-red);
+}
+
+.gols-notification-warning .gols-notification-icon {
+  color: var(--gols-warning-color, #f59e0b);
+}
+
+.gols-notification-info .gols-notification-icon {
+  color: var(--gols-zodiac-blue);
+}
+
+.gols-notification-message {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--gols-charcoal-grey);
+}
+
+.gols-notification-close {
+  background: none;
+  border: none;
+  color: var(--gols-grey);
+  cursor: pointer;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  padding: 0;
+  margin-left: var(--gols-spacing-sm);
+  transition: color 0.2s ease;
+}
+
+.gols-notification-close:hover {
+  color: var(--gols-charcoal-grey);
+}
+
+.gols-notification-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--gols-gallery-grey);
+  width: 100%;
+}
+
+.gols-notification-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  transition: width linear;
+}
+
+.gols-notification-progress-active::after {
+  width: 100%;
+}
+
+.gols-notification-success .gols-notification-progress::after {
+  background: var(--gols-success-color, #22c55e);
+}
+
+.gols-notification-error .gols-notification-progress::after {
+  background: var(--gols-cardinal-red);
+}
+
+.gols-notification-warning .gols-notification-progress::after {
+  background: var(--gols-warning-color, #f59e0b);
+}
+
+.gols-notification-info .gols-notification-progress::after {
+  background: var(--gols-zodiac-blue);
+}
+
+/* Theme and Utility Classes */
+.gols-theme-dark {
+  --gols-background: var(--gols-charcoal-grey);
+  --gols-text-primary: white;
+  --gols-text-secondary: var(--gols-gallery-grey);
+}
+
+.gols-theme-light {
+  --gols-background: white;
+  --gols-text-primary: var(--gols-black);
+  --gols-text-secondary: var(--gols-charcoal-grey);
+}
+
+.gols-debug-mode {
+  --debug-border: 1px dashed var(--gols-cardinal-red);
+}
+
+.gols-debug-mode * {
+  outline: var(--debug-border);
+  outline-offset: -1px;
+}
+
+/* Additional Status Classes */
+.gols-status-connected {
+  color: var(--gols-success-color, #22c55e);
+  animation: gols-pulse-success 2s infinite;
+}
+
+.gols-status-disconnected {
+  color: var(--gols-grey);
+}
+
+.gols-status-error {
+  color: var(--gols-cardinal-red);
+  animation: gols-pulse-error 1s infinite;
+}
+
+.gols-status-connecting {
+  color: var(--gols-warning-color, #f59e0b);
+  animation: gols-pulse-warning 1.5s infinite;
+}
+
+@keyframes gols-pulse-success {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes gols-pulse-error {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes gols-pulse-warning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Game Status Colors */
+.gols-status-upcoming {
+  color: var(--gols-grey);
+  background: var(--gols-gallery-grey);
+}
+
+.gols-status-live {
+  color: var(--gols-success-color, #22c55e);
+  background: rgba(34, 197, 94, 0.1);
+  animation: gols-pulse-success 2s infinite;
+}
+
+.gols-status-completed {
+  color: var(--gols-charcoal-grey);
+  background: var(--gols-gallery-grey);
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .gols-main {
+    grid-template-columns: 1fr;
+    padding: var(--gols-spacing-md);
+  }
+  
+  .gols-header {
+    padding: var(--gols-spacing-sm) var(--gols-spacing-md);
+  }
+  
+  .gols-logo-text {
+    display: none;
+  }
+  
+  .gols-teams {
+    flex-direction: column;
+    gap: var(--gols-spacing-md);
+  }
+  
+  .gols-vs {
+    order: -1;
+    font-size: 1.2rem;
+  }
+  
+  .gols-game-meta {
+    flex-direction: column;
+    gap: var(--gols-spacing-sm);
+    align-items: center;
+  }
+  
+  .gols-settings-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .gols-notifications {
+    left: var(--gols-spacing-md);
+    right: var(--gols-spacing-md);
+    max-width: none;
+  }
+  
+  .gols-debug-panel {
+    left: var(--gols-spacing-md);
+    right: var(--gols-spacing-md);
+    width: auto;
+  }
+}

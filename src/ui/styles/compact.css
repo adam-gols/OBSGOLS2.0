@@ -1,0 +1,966 @@
+/**
+ * Compact GOLS Widget Styles
+ * Optimized for small browser dimensions
+ */
+
+/* Base Variables */
+:root {
+  --gols-cardinal-red: #C62128;
+  --gols-zodiac-blue: #37605F;
+  --gols-charcoal-grey: #3D4145;
+  --gols-gallery-grey: #F0F0F0;
+  --gols-black: #1A1A1A;
+  --gols-white: #FFFFFF;
+  --gols-font-primary: 'Roboto', Arial, sans-serif;
+  --gols-font-secondary: 'Oswald', Arial, sans-serif;
+}
+
+/* Reset and Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--gols-font-primary);
+  background: var(--gols-white);
+  color: var(--gols-black);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+#gols-widget {
+  width: 100%;
+  height: 100vh;
+  max-width: 320px;
+  max-height: 220px;
+  background: var(--gols-white);
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  font-size: 11px;
+  /* Ensure all child elements stay within bounds */
+  contain: layout style paint;
+  /* Force strict containment */
+  isolation: isolate;
+}
+
+/* Constrain all absolutely positioned children */
+#gols-widget * {
+  max-width: 100%;
+}
+
+#gols-widget .gols-settings-overlay,
+#gols-widget .gols-notifications,
+#gols-widget .gols-debug-panel {
+  max-width: 320px;
+  max-height: 220px;
+  box-sizing: border-box;
+}
+
+/* Ensure all select dropdowns stay within widget */
+#gols-widget select {
+  max-width: 100%;
+  /* Force select dropdowns to not extend beyond widget */
+  overflow: hidden;
+}
+
+/* Force all absolutely positioned elements to stay within widget bounds */
+#gols-widget *[style*="position: absolute"],
+#gols-widget *[style*="position: fixed"] {
+  max-width: 320px !important;
+  max-height: 220px !important;
+}
+
+/* Browser dropdown positioning constraint */
+select:focus {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure any absolutely positioned elements stay within widget */
+#gols-widget * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Additional containment and overflow prevention */
+#gols-widget {
+  /* ...existing code... */
+  /* Force strict containment */
+  isolation: isolate;
+  contain: layout style paint size;
+}
+
+/* Ensure no child elements can cause overflow */
+#gols-widget *,
+#gols-widget *:before,
+#gols-widget *:after {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Prevent any popover or floating elements from escaping */
+#gols-widget [popover],
+#gols-widget .dropdown,
+#gols-widget .popover,
+#gols-widget .tooltip {
+  position: absolute !important;
+  max-width: calc(100% - 10px) !important;
+  max-height: calc(100% - 10px) !important;
+  left: 5px !important;
+  top: 5px !important;
+}
+
+/* Force browser native select dropdowns to behave */
+#gols-widget select::-webkit-scrollbar {
+  width: 0;
+}
+
+#gols-widget select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg viewBox='0 0 4 5' xmlns='http://www.w3.org/2000/svg'><path d='M2 0L0 2h4zm0 5L0 3h4z' fill='%23666'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px;
+  padding-right: 24px;
+}
+
+/* Compact Header */
+.gols-compact-header {
+  background: linear-gradient(135deg, var(--gols-zodiac-blue) 0%, var(--gols-cardinal-red) 100%);
+  color: white;
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 30px;
+}
+
+.gols-logo-text {
+  font-family: var(--gols-font-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gols-connection-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gols-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.gols-status-indicator i {
+  font-size: 7px;
+  color: #22c55e;
+}
+
+.gols-status-text {
+  font-size: 9px;
+  font-weight: 500;
+}
+
+/* Compact Main Content */
+.gols-compact-main {
+  padding: 8px;
+  height: calc(100% - 30px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Top Controls Row */
+.gols-top-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.gols-event-control,
+.gols-stream-control {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.gols-compact-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.gols-event-selector {
+  display: flex;
+  gap: 3px;
+}
+
+.gols-compact-select {
+  flex: 1;
+  padding: 3px 6px;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 3px;
+  font-size: 10px;
+  background: white;
+  height: 24px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gols-compact-button {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 3px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 9px;
+  color: var(--gols-charcoal-grey);
+}
+
+.gols-compact-button:hover {
+  background: var(--gols-gallery-grey);
+}
+
+/* Game Section */
+.gols-game-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gols-game-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  background: var(--gols-gallery-grey);
+  border-radius: 3px;
+}
+
+.gols-game-navigation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gols-nav-button {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--gols-charcoal-grey);
+  border-radius: 2px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 8px;
+  color: var(--gols-charcoal-grey);
+}
+
+.gols-nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gols-nav-button:not(:disabled):hover {
+  background: var(--gols-gallery-grey);
+}
+
+.gols-game-counter {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+  min-width: 30px;
+  text-align: center;
+}
+
+.gols-recording-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gols-record-button {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 8px;
+}
+
+.gols-record-start {
+  background: var(--gols-cardinal-red);
+  color: white;
+}
+
+.gols-record-stop {
+  background: var(--gols-charcoal-grey);
+  color: white;
+}
+
+.gols-record-stop:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gols-recording-time {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+  min-width: 30px;
+}
+
+/* Game Details */
+.gols-game-details {
+  flex: 1;
+  padding: 6px;
+  background: white;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gols-teams-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gols-team-compact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.gols-team-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.gols-team-score {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gols-cardinal-red);
+}
+
+.gols-vs-compact {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+  padding: 0 4px;
+}
+
+.gols-game-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 4px;
+  border-top: 1px solid var(--gols-gallery-grey);
+}
+
+.gols-game-status {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--gols-zodiac-blue);
+  text-transform: uppercase;
+}
+
+.gols-game-time {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--gols-charcoal-grey);
+}
+
+.gols-event-control,
+.gols-stream-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gols-compact-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gols-event-selector {
+  display: flex;
+  gap: 4px;
+}
+
+.gols-compact-select {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 4px;
+  font-size: 11px;
+  background: white;
+  color: var(--gols-black);
+}
+
+.gols-compact-button {
+  padding: 6px 8px;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 4px;
+  background: white;
+  color: var(--gols-charcoal-grey);
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.gols-compact-button:hover {
+  background: var(--gols-gallery-grey);
+}
+
+/* Game Section */
+.gols-game-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gols-game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gols-game-navigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gols-nav-button {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 4px;
+  background: white;
+  color: var(--gols-charcoal-grey);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.gols-nav-button:hover:not(:disabled) {
+  background: var(--gols-gallery-grey);
+}
+
+.gols-nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gols-game-counter {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+  min-width: 40px;
+  text-align: center;
+}
+
+.gols-recording-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gols-record-button {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+}
+
+.gols-record-start {
+  background: var(--gols-cardinal-red);
+  color: white;
+}
+
+.gols-record-stop {
+  background: var(--gols-charcoal-grey);
+  color: white;
+}
+
+.gols-record-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gols-recording-time {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+  min-width: 35px;
+}
+
+/* Game Details */
+.gols-game-details {
+  flex: 1;
+  background: var(--gols-gallery-grey);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.gols-teams-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.gols-team-compact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.gols-team-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+  text-align: center;
+}
+
+.gols-team-score {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gols-cardinal-red);
+  font-family: var(--gols-font-secondary);
+}
+
+.gols-vs-compact {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+  margin: 0 8px;
+}
+
+.gols-game-meta-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9px;
+  color: var(--gols-charcoal-grey);
+}
+
+.gols-game-status {
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: var(--gols-zodiac-blue);
+  color: white;
+}
+
+.gols-game-time {
+  font-weight: 600;
+}
+
+/* Score Editor */
+.gols-score-editor-compact {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+}
+
+.gols-score-input {
+  width: 50px;
+  padding: 4px 6px;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 4px;
+  font-size: 11px;
+  text-align: center;
+}
+
+.gols-update-button {
+  padding: 4px 8px;
+  background: var(--gols-cardinal-red);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.gols-update-button:hover {
+  background: #a01b21;
+}
+
+/* Settings */
+.gols-settings-toggle {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+}
+
+.gols-settings-button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 50%;
+  background: white;
+  color: var(--gols-charcoal-grey);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.gols-settings-button:hover {
+  background: var(--gols-gallery-grey);
+}
+
+/* Removed duplicate settings overlay styles - using compact version below */
+
+.gols-button:hover {
+  opacity: 0.9;
+}
+
+/* Notifications */
+.gols-notifications {
+  position: absolute;
+  top: 50px;
+  right: 8px;
+  max-width: 200px;
+  z-index: 999;
+}
+
+/* Debug Panel */
+.gols-debug-panel {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.9);
+  color: white;
+  padding: 8px;
+  font-size: 10px;
+  overflow-y: auto;
+  z-index: 998;
+  /* Ensure debug panel stays within widget bounds */
+  max-width: 320px;
+  max-height: calc(220px - 40px);
+  box-sizing: border-box;
+}
+
+.gols-debug-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* Loading */
+.gols-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255,255,255,0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 999;
+  /* Ensure loading overlay stays within widget bounds */
+  max-width: 320px;
+  max-height: 220px;
+  box-sizing: border-box;
+}
+
+.gols-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gols-gallery-grey);
+  border-top: 2px solid var(--gols-cardinal-red);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.gols-loading-text {
+  font-size: 10px;
+  color: var(--gols-charcoal-grey);
+}
+
+/* Responsive adjustments for very small sizes */
+@media (max-width: 300px) {
+  .gols-top-controls {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .gols-teams-compact {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .gols-vs-compact {
+    order: -1;
+  }
+}
+
+/* Settings Toggle */
+.gols-settings-toggle {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+}
+
+.gols-settings-button {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: var(--gols-charcoal-grey);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 8px;
+}
+
+.gols-settings-button:hover {
+  background: var(--gols-cardinal-red);
+}
+
+/* Settings Overlay */
+.gols-settings-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  overflow: hidden;
+  /* Ensure overlay stays within widget bounds */
+  max-width: 320px;
+  max-height: 220px;
+}
+
+.gols-settings-panel-compact {
+  background: white;
+  border-radius: 4px;
+  width: calc(100% - 20px);
+  max-width: 280px;
+  max-height: calc(100% - 20px);
+  overflow-y: auto;
+  font-size: 9px;
+  /* Ensure panel never exceeds widget bounds */
+  box-sizing: border-box;
+}
+
+.gols-settings-header {
+  padding: 6px 8px;
+  background: var(--gols-charcoal-grey);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 4px 4px 0 0;
+}
+
+.gols-settings-header h3 {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.gols-close-button {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 8px;
+}
+
+.gols-close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.gols-settings-content {
+  padding: 10px;
+}
+
+.gols-settings-group {
+  margin-bottom: 12px;
+}
+
+.gols-settings-group h4 {
+  margin: 0 0 6px 0;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gols-charcoal-grey);
+}
+
+.gols-input,
+.gols-textarea {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 3px;
+  font-size: 9px;
+  margin-bottom: 4px;
+  box-sizing: border-box;
+}
+
+.gols-textarea {
+  height: 40px;
+  resize: vertical;
+}
+
+.gols-button {
+  padding: 4px 8px;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 3px;
+  font-size: 8px;
+  cursor: pointer;
+  background: white;
+  color: var(--gols-charcoal-grey);
+}
+
+.gols-button:hover {
+  background: var(--gols-gallery-grey);
+}
+
+.gols-button-primary {
+  background: var(--gols-zodiac-blue);
+  color: white;
+  border-color: var(--gols-zodiac-blue);
+}
+
+.gols-button-primary:hover {
+  background: #2a4f4e;
+}
+
+.gols-button-danger {
+  background: var(--gols-cardinal-red);
+  color: white;
+  border-color: var(--gols-cardinal-red);
+}
+
+.gols-button-danger:hover {
+  background: #a01b20;
+}
+
+.gols-settings-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid var(--gols-gallery-grey);
+}
+
+/* Notifications */
+.gols-notifications {
+  position: absolute;
+  top: 32px;
+  right: 8px;
+  z-index: 500;
+  max-width: calc(100% - 16px);
+  width: 180px;
+  /* Ensure notifications stay within widget bounds */
+  box-sizing: border-box;
+}
+
+.gols-notification {
+  background: white;
+  border: 1px solid var(--gols-gallery-grey);
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 4px;
+  font-size: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.gols-notification.error {
+  border-color: var(--gols-cardinal-red);
+  background: #fef2f2;
+  color: var(--gols-cardinal-red);
+}
+
+.gols-notification.success {
+  border-color: #22c55e;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.gols-notification.warning {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+}

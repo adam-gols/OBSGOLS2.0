@@ -1,0 +1,334 @@
+/**
+ * Service Health Monitor - Connection monitoring for all external services
+ * Provides real-time health status and circuit breaker functionality
+ */
+
+import { logger } from '../utils/logger.js';
+import { eventBus, Events } from './event-manager.js';
+import { GOLS_CONSTANTS } from '../utils/constants.js';
+
+export enum ServiceStatus {
+  UNKNOWN = 'unknown',
+  CONNECTED = 'connected',
+  DISCONNECTED = 'disconnected',
+  ERROR = 'error',
+  CONNECTING = 'connecting'
+}
+
+export interface ServiceHealth {
+  status: ServiceStatus;
+  lastCheck: Date;
+  lastSuccess?: Date;
+  lastError?: string | undefined;
+  consecutiveFailures: number;
+  responseTime?: number;
+}
+
+export interface ServiceHealthState {
+  googleSheets: ServiceHealth;
+  obs: ServiceHealth;
+  singularLive: ServiceHealth;
+}
+
+export class ServiceHealthMonitor {
+  private static instance: ServiceHealthMonitor;
+  private healthState: ServiceHealthState;
+  private monitoringInterval?: NodeJS.Timeout | undefined;
+  private readonly checkInterval = GOLS_CONSTANTS.HEALTH_CHECK_INTERVAL;
+  private isMonitoring = false;
+
+  private constructor() {
+    this.healthState = this.getInitialHealthState();
+    
+    logger.debug('ServiceHealthMonitor initialized', { 
+      module: 'ServiceHealthMonitor',
+      data: { checkInterval: this.checkInterval }
+    });
+  }
+
+  public static getInstance(): ServiceHealthMonitor {
+    if (!ServiceHealthMonitor.instance) {
+      ServiceHealthMonitor.instance = new ServiceHealthMonitor();
+    }
+    return ServiceHealthMonitor.instance;
+  }
+
+  /**
+   * Get initial health state for all services
+   */
+  private getInitialHealthState(): ServiceHealthState {
+    const initialHealth: ServiceHealth = {
+      status: ServiceStatus.UNKNOWN,
+      lastCheck: new Date(),
+      consecutiveFailures: 0
+    };
+
+    return {
+      googleSheets: { ...initialHealth },
+      obs: { ...initialHealth },
+      singularLive: { ...initialHealth }
+    };
+  }
+
+  /**
+   * Start health monitoring
+   */
+  public startMonitoring(): void {
+    if (this.isMonitoring) {
+      logger.warn('Health monitoring already running', { module: 'SERVICE_HEALTH' });
+      return;
+    }
+
+    this.isMonitoring = true;
+    
+    logger.info('Starting service health monitoring', {
+      module: 'SERVICE_HEALTH',
+      action: 'START_MONITORING',
+      data: { interval: this.checkInterval }
+    });
+
+    // Initial health check
+    this.performHealthChecks();
+
+    // Set up periodic checks
+    this.monitoringInterval = setInterval(() => {
+      this.performHealthChecks();
+    }, this.checkInterval);
+  }
+
+  /**
+   * Stop health monitoring
+   */
+  public stopMonitoring(): void {
+    if (!this.isMonitoring) {
+      return;
+    }
+
+    this.isMonitoring = false;
+
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval);
+      this.monitoringInterval = undefined;
+    }
+
+    logger.info('Service health monitoring stopped', { 
+      module: 'SERVICE_HEALTH',
+      action: 'STOP_MONITORING'
+    });
+  }
+
+  /**
+   * Perform health checks for all services
+   */
+  private async performHealthChecks(): Promise<void> {
+    logger.debug('Performing health checks', { 
+      module: 'SERVICE_HEALTH',
+      action: 'HEALTH_CHECK'
+    });
+
+    // Note: Actual service connectivity checks will be implemented in respective integration steps
+    // For now, we just update the check timestamp
+    const checkTime = new Date();
+    
+    Object.keys(this.healthState).forEach(service => {
+      (this.healthState as any)[service].lastCheck = checkTime;
+    });
+  }
+
+  /**
+   * Update service health status
+   */
+  public updateServiceHealth(
+    service: keyof ServiceHealthState,
+    status: ServiceStatus,
+    error?: string,
+    responseTime?: number
+  ): void {
+    const health = this.healthState[service];
+    const previousStatus = health.status;
+    
+    health.status = status;
+    health.lastCheck = new Date();
+    
+    if (status === ServiceStatus.CONNECTED) {
+      health.lastSuccess = new Date();
+      health.consecutiveFailures = 0;
+      health.lastError = undefined;
+      if (responseTime !== undefined) {
+        health.responseTime = responseTime;
+      }
+    } else if (status === ServiceStatus.ERROR || status === ServiceStatus.DISCONNECTED) {
+      health.consecutiveFailures++;
+      if (error) {
+        health.lastError = error;
+      }
+    }
+
+    // Emit events for status changes
+    if (previousStatus !== status) {
+      const eventData = {
+        service,
+        status,
+        previousStatus,
+        consecutiveFailures: health.consecutiveFailures,
+        error,
+        responseTime
+      };
+
+      if (status === ServiceStatus.CONNECTED) {
+        eventBus.emit(Events.SERVICE_CONNECTED, eventData);
+        logger.info(`Service ${service} connected`, {
+          module: 'SERVICE_HEALTH',
+          action: 'SERVICE_CONNECTED',
+          data: eventData
+        });
+      } else if (status === ServiceStatus.DISCONNECTED || status === ServiceStatus.ERROR) {
+        eventBus.emit(Events.SERVICE_DISCONNECTED, eventData);
+        logger.warn(`Service ${service} disconnected`, {
+          module: 'SERVICE_HEALTH',
+          action: 'SERVICE_DISCONNECTED',
+          data: eventData
+        });
+        
+        if (status === ServiceStatus.ERROR) {
+          eventBus.emit(Events.SERVICE_ERROR, eventData);
+          logger.error(`Service ${service} error`, {
+            module: 'SERVICE_HEALTH',
+            action: 'SERVICE_ERROR',
+            data: eventData
+          });
+        }
+      }
+    }
+  }
+
+  /**
+   * Add a new service to monitoring (convenience method)
+   */
+  public addService(serviceKey: string, serviceName: string): void {
+    // For now, we only support the predefined services in ServiceHealthState
+    // This is a placeholder for future dynamic service registration
+    logger.debug('Service registration requested', { 
+      module: 'ServiceHealthMonitor',
+      data: { serviceKey, serviceName }
+    });
+  }
+
+  /**
+   * Update service status (convenience method)
+   */
+  public updateServiceStatus(service: keyof ServiceHealthState, status: ServiceStatus, error?: string): void {
+    this.updateServiceHealth(service, status, error);
+  }
+
+  /**
+   * Get health status for a specific service
+   */
+  public getServiceHealth(service: keyof ServiceHealthState): ServiceHealth {
+    return { ...this.healthState[service] };
+  }
+
+  /**
+   * Get health status for all services
+   */
+  public getAllServiceHealth(): ServiceHealthState {
+    return {
+      googleSheets: { ...this.healthState.googleSheets },
+      obs: { ...this.healthState.obs },
+      singularLive: { ...this.healthState.singularLive }
+    };
+  }
+
+  /**
+   * Check if a service is healthy (connected)
+   */
+  public isServiceHealthy(service: keyof ServiceHealthState): boolean {
+    return this.healthState[service].status === ServiceStatus.CONNECTED;
+  }
+
+  /**
+   * Check if all services are healthy
+   */
+  public areAllServicesHealthy(): boolean {
+    return Object.values(this.healthState).every(health => 
+      health.status === ServiceStatus.CONNECTED
+    );
+  }
+
+  /**
+   * Get services with issues
+   */
+  public getUnhealthyServices(): Array<{ service: string; health: ServiceHealth }> {
+    return Object.entries(this.healthState)
+      .filter(([_, health]) => health.status !== ServiceStatus.CONNECTED)
+      .map(([service, health]) => ({ service, health }));
+  }
+
+  /**
+   * Circuit breaker check - should service be used?
+   */
+  public shouldUseService(service: keyof ServiceHealthState, failureThreshold = 3): boolean {
+    const health = this.healthState[service];
+    
+    // If too many consecutive failures, circuit is open
+    if (health.consecutiveFailures >= failureThreshold) {
+      logger.debug(`Circuit breaker OPEN for ${service}`, {
+        module: 'SERVICE_HEALTH',
+        action: 'CIRCUIT_BREAKER',
+        data: { service, consecutiveFailures: health.consecutiveFailures, threshold: failureThreshold }
+      });
+      return false;
+    }
+    
+    return health.status === ServiceStatus.CONNECTED || health.status === ServiceStatus.UNKNOWN;
+  }
+
+  /**
+   * Reset circuit breaker for a service
+   */
+  public resetCircuitBreaker(service: keyof ServiceHealthState): void {
+    this.healthState[service].consecutiveFailures = 0;
+    this.healthState[service].lastError = undefined;
+    
+    logger.info(`Circuit breaker reset for ${service}`, {
+      module: 'SERVICE_HEALTH',
+      action: 'CIRCUIT_BREAKER_RESET',
+      data: { service }
+    });
+  }
+
+  /**
+   * Get overall system health summary
+   */
+  public getHealthSummary() {
+    const services = Object.entries(this.healthState);
+    const connectedCount = services.filter(([_, health]) => health.status === ServiceStatus.CONNECTED).length;
+    const errorCount = services.filter(([_, health]) => health.status === ServiceStatus.ERROR).length;
+    const disconnectedCount = services.filter(([_, health]) => health.status === ServiceStatus.DISCONNECTED).length;
+    
+    return {
+      totalServices: services.length,
+      connectedServices: connectedCount,
+      errorServices: errorCount,
+      disconnectedServices: disconnectedCount,
+      overallHealthy: connectedCount === services.length,
+      healthPercentage: Math.round((connectedCount / services.length) * 100)
+    };
+  }
+
+  /**
+   * Get debug information
+   */
+  public getDebugInfo() {
+    return {
+      isMonitoring: this.isMonitoring,
+      checkInterval: this.checkInterval,
+      healthState: this.getAllServiceHealth(),
+      summary: this.getHealthSummary(),
+      unhealthyServices: this.getUnhealthyServices()
+    };
+  }
+}
+
+// Export singleton instance
+export const serviceHealth = ServiceHealthMonitor.getInstance();

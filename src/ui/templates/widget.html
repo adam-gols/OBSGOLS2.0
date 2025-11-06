@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game On Live Studio - OBS Widget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <div id="gols-widget" class="gols-widget">
+    <!-- Header Section -->
+    <header class="gols-header">
+      <div class="gols-logo">
+        <img src="assets/gols-logo.svg" alt="Game On Live Studio" class="gols-logo-image">
+        <span class="gols-logo-text">OBS Widget</span>
+      </div>
+      <div class="gols-connection-status">
+        <div class="gols-status-indicator" id="connection-status">
+          <i class="fas fa-circle"></i>
+          <span class="gols-status-text">Connecting...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="gols-main">
+      <!-- Control Panel -->
+      <section class="gols-control-panel">
+        <!-- Event Selector -->
+        <div class="gols-control-group">
+          <label class="gols-label">
+            <i class="fas fa-calendar-alt"></i>
+            Event Selection
+          </label>
+          <div class="gols-event-selector">
+            <select id="event-selector" class="gols-select">
+              <option value="">Select an event...</option>
+            </select>
+            <button id="refresh-events" class="gols-button gols-button-secondary">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Site Stream Selector -->
+        <div class="gols-control-group">
+          <label class="gols-label">
+            <i class="fas fa-video"></i>
+            Site Stream
+          </label>
+          <div class="gols-stream-selector">
+            <select id="stream-selector" class="gols-select">
+              <option value="">Select stream...</option>
+              <option value="main">Main Stream</option>
+              <option value="secondary">Secondary Stream</option>
+              <option value="mobile">Mobile Stream</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Recording Controls -->
+        <div class="gols-control-group">
+          <label class="gols-label">
+            <i class="fas fa-record-vinyl"></i>
+            Recording
+          </label>
+          <div class="gols-recording-controls">
+            <button id="start-recording" class="gols-button gols-button-primary">
+              <i class="fas fa-play"></i>
+              Start
+            </button>
+            <button id="stop-recording" class="gols-button gols-button-danger" disabled>
+              <i class="fas fa-stop"></i>
+              Stop
+            </button>
+            <span class="gols-recording-time" id="recording-time">00:00:00</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Game Navigator -->
+      <section class="gols-game-navigator">
+        <div class="gols-navigator-header">
+          <h3 class="gols-section-title">
+            <i class="fas fa-gamepad"></i>
+            Game Navigation
+          </h3>
+          <div class="gols-game-info">
+            <span class="gols-current-game" id="current-game">No game selected</span>
+            <span class="gols-game-counter" id="game-counter">0 / 0</span>
+          </div>
+        </div>
+        
+        <div class="gols-navigator-controls">
+          <button id="prev-game" class="gols-button gols-button-secondary" disabled>
+            <i class="fas fa-chevron-left"></i>
+            Previous
+          </button>
+          <button id="next-game" class="gols-button gols-button-secondary" disabled>
+            <i class="fas fa-chevron-right"></i>
+            Next
+          </button>
+        </div>
+
+        <!-- Game Details Display -->
+        <div class="gols-game-details" id="game-details">
+          <div class="gols-game-card">
+            <div class="gols-game-header">
+              <div class="gols-teams">
+                <div class="gols-team gols-team-home">
+                  <span class="gols-team-name" id="home-team">Home Team</span>
+                  <span class="gols-team-score" id="home-score">0</span>
+                </div>
+                <div class="gols-vs">VS</div>
+                <div class="gols-team gols-team-away">
+                  <span class="gols-team-name" id="away-team">Away Team</span>
+                  <span class="gols-team-score" id="away-score">0</span>
+                </div>
+              </div>
+              <div class="gols-game-status" id="game-status">Upcoming</div>
+            </div>
+            
+            <div class="gols-game-meta">
+              <div class="gols-meta-item">
+                <i class="fas fa-clock"></i>
+                <span id="game-time">--:--</span>
+              </div>
+              <div class="gols-meta-item">
+                <i class="fas fa-calendar"></i>
+                <span id="game-date">--/--/----</span>
+              </div>
+              <div class="gols-meta-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="game-location">Location TBD</span>
+              </div>
+            </div>
+
+            <!-- Score Editor (for live games) -->
+            <div class="gols-score-editor" id="score-editor" style="display: none;">
+              <div class="gols-score-controls">
+                <div class="gols-score-input">
+                  <label>Home Score</label>
+                  <input type="number" id="home-score-input" min="0" class="gols-input">
+                </div>
+                <div class="gols-score-input">
+                  <label>Away Score</label>
+                  <input type="number" id="away-score-input" min="0" class="gols-input">
+                </div>
+                <button id="update-scores" class="gols-button gols-button-primary">
+                  <i class="fas fa-save"></i>
+                  Update
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Settings Panel (collapsible) -->
+    <aside class="gols-settings-panel" id="settings-panel">
+      <div class="gols-settings-header">
+        <h3 class="gols-section-title">
+          <i class="fas fa-cog"></i>
+          Settings
+        </h3>
+        <button id="toggle-settings" class="gols-button gols-button-ghost">
+          <i class="fas fa-chevron-down"></i>
+        </button>
+      </div>
+      
+      <div class="gols-settings-content" id="settings-content">
+        <!-- Google Sheets Settings -->
+        <div class="gols-settings-group">
+          <h4 class="gols-settings-group-title">Google Sheets Integration</h4>
+          <div class="gols-field">
+            <label class="gols-label">Spreadsheet URL</label>
+            <input type="url" id="sheets-url" class="gols-input" placeholder="https://docs.google.com/spreadsheets/d/...">
+          </div>
+          <div class="gols-field">
+            <label class="gols-label">Service Account Key (Optional)</label>
+            <textarea id="service-account-key" class="gols-textarea" placeholder="Paste service account JSON here..."></textarea>
+          </div>
+          <button id="test-sheets-connection" class="gols-button gols-button-secondary">
+            <i class="fas fa-link"></i>
+            Test Connection
+          </button>
+        </div>
+
+        <!-- OBS Settings -->
+        <div class="gols-settings-group">
+          <h4 class="gols-settings-group-title">OBS WebSocket</h4>
+          <div class="gols-field">
+            <label class="gols-label">Host</label>
+            <input type="text" id="obs-host" class="gols-input" value="localhost">
+          </div>
+          <div class="gols-field">
+            <label class="gols-label">Port</label>
+            <input type="number" id="obs-port" class="gols-input" value="4455">
+          </div>
+          <div class="gols-field">
+            <label class="gols-label">Password (Optional)</label>
+            <input type="password" id="obs-password" class="gols-input">
+          </div>
+          <button id="test-obs-connection" class="gols-button gols-button-secondary">
+            <i class="fas fa-link"></i>
+            Test Connection
+          </button>
+        </div>
+
+        <!-- Singular Live Settings -->
+        <div class="gols-settings-group">
+          <h4 class="gols-settings-group-title">Singular Live</h4>
+          <div class="gols-field">
+            <label class="gols-label">Data Stream Endpoint</label>
+            <input type="url" id="singular-endpoint" class="gols-input" placeholder="https://app.singular.live/...">
+          </div>
+          <div class="gols-field">
+            <label class="gols-label">Private Token</label>
+            <input type="password" id="singular-token" class="gols-input">
+          </div>
+          <div class="gols-field">
+            <label class="gols-label">Update Interval (ms)</label>
+            <input type="number" id="singular-interval" class="gols-input" value="1000" min="500">
+          </div>
+          <button id="test-singular-connection" class="gols-button gols-button-secondary">
+            <i class="fas fa-link"></i>
+            Test Connection
+          </button>
+        </div>
+
+        <!-- UI Settings -->
+        <div class="gols-settings-group">
+          <h4 class="gols-settings-group-title">Interface</h4>
+          <div class="gols-field">
+            <label class="gols-checkbox-label">
+              <input type="checkbox" id="debug-mode" class="gols-checkbox">
+              <span class="gols-checkbox-indicator"></span>
+              Debug Mode
+            </label>
+          </div>
+          <div class="gols-field">
+            <label class="gols-checkbox-label">
+              <input type="checkbox" id="auto-save" class="gols-checkbox" checked>
+              <span class="gols-checkbox-indicator"></span>
+              Auto-save Settings
+            </label>
+          </div>
+        </div>
+
+        <div class="gols-settings-actions">
+          <button id="reset-settings" class="gols-button gols-button-danger">
+            <i class="fas fa-trash"></i>
+            Reset All
+          </button>
+          <button id="save-settings" class="gols-button gols-button-primary">
+            <i class="fas fa-save"></i>
+            Save Settings
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Notifications Area -->
+    <div class="gols-notifications" id="notifications-area">
+      <!-- Notifications will be dynamically inserted here -->
+    </div>
+
+    <!-- Debug Panel (development only) -->
+    <div class="gols-debug-panel" id="debug-panel" style="display: none;">
+      <div class="gols-debug-header">
+        <h4>Debug Information</h4>
+        <button id="toggle-debug" class="gols-button gols-button-ghost">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="gols-debug-content">
+        <div class="gols-debug-section">
+          <h5>Service Health</h5>
+          <div id="service-health-display"></div>
+        </div>
+        <div class="gols-debug-section">
+          <h5>Event Data</h5>
+          <pre id="event-data-display"></pre>
+        </div>
+        <div class="gols-debug-section">
+          <h5>Console Logs</h5>
+          <div id="console-logs-display"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="gols-loading-overlay" id="loading-overlay">
+      <div class="gols-loading-spinner">
+        <div class="gols-spinner"></div>
+        <span class="gols-loading-text">Loading...</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

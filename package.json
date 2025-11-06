@@ -1,0 +1,43 @@
+{
+  "name": "gols-obs-widget",
+  "version": "1.0.0",
+  "description": "Game On Live Studio OBS Widget - Interactive sports broadcasting widget with Google Sheets integration",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint . --ext ts,js --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,js --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vitejs/plugin-legacy": "^5.2.0",
+    "@vitest/coverage-v8": "^1.0.4",
+    "@vitest/ui": "^1.0.4",
+    "eslint": "^8.55.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vitest": "^1.0.4"
+  },
+  "dependencies": {
+    "googleapis": "^164.1.0",
+    "obs-websocket-js": "^5.0.3"
+  },
+  "keywords": [
+    "obs",
+    "streaming",
+    "sports",
+    "broadcasting",
+    "google-sheets",
+    "singular-live"
+  ],
+  "author": "Game On Live Studio",
+  "license": "MIT"
+}
