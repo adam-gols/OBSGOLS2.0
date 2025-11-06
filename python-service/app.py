@@ -330,11 +330,152 @@ def debug_file_cabinet():
             'error': str(e)
         }), 500
 
+@app.route('/streams/<ops_sheet_id>', methods=['GET'])
+def get_streams(ops_sheet_id):
+    """Get stream information from an operations sheet's Site Info tab."""
+    try:
+        # Open the operations sheet
+        ops_sheet = sheets_service.client.open_by_key(ops_sheet_id)
+        
+        # Try to find the Site Info worksheet
+        site_info_worksheet = None
+        worksheet_names = ['Site Info', 'SiteInfo', 'Site_Info', 'site info', 'streams', 'Streams']
+        
+        for name in worksheet_names:
+            try:
+                site_info_worksheet = ops_sheet.worksheet(name)
+                break
+            except Exception:
+                continue
+        
+        if not site_info_worksheet:
+            # If no Site Info sheet found, list available worksheets
+            available_sheets = [ws.title for ws in ops_sheet.worksheets()]
+            return jsonify({
+                'success': False,
+                'error': 'Site Info worksheet not found',
+                'available_worksheets': available_sheets,
+                'note': 'Expected worksheet names: Site Info, SiteInfo, Site_Info, site info, streams, Streams'
+            }), 404
+        
+        # Get all values from the Site Info worksheet
+        values = site_info_worksheet.get_all_values()
+        
+        if not values:
+            return jsonify({
+                'success': True,
+                'data': [],
+                'count': 0,
+                'worksheet_name': site_info_worksheet.title
+            })
+        
+        # Parse the header row to find the column indexes
+        headers = [h.strip().lower() for h in values[0]]
+        
+        # Find column indexes (flexible matching)
+        site_name_col = None  # DATE column
+        stream_name_col = None  # CHANNEL column  
+        stream_url_col = None
+        location_col = None  # LOCATION column
+        active_col = None
+        
+        for i, header in enumerate(headers):
+            header_lower = header.lower()
+            if header_lower == 'date':
+                site_name_col = i
+            elif header_lower == 'channel':
+                stream_name_col = i
+            elif header_lower == 'location':
+                location_col = i
+            elif 'stream' in header_lower and ('url' in header_lower or 'link' in header_lower):
+                stream_url_col = i
+            elif 'active' in header_lower or 'enabled' in header_lower:
+                active_col = i
+        
+        streams = []
+        for row_idx, row in enumerate(values[1:], 1):  # Skip header row
+            if len(row) == 0:
+                continue
+                
+            stream = {
+                'row_number': row_idx + 1,  # +1 for header row
+            }
+            
+            # Get site name
+            if site_name_col is not None and site_name_col < len(row):
+                stream['site_name'] = row[site_name_col].strip()
+            else:
+                stream['site_name'] = row[0].strip() if len(row) > 0 else ''
+            
+            # Get stream name
+            if stream_name_col is not None and stream_name_col < len(row):
+                stream['stream_name'] = row[stream_name_col].strip()
+            elif len(row) > 1:
+                stream['stream_name'] = row[1].strip()
+            else:
+                stream['stream_name'] = ''
+            
+            # Get stream URL
+            if stream_url_col is not None and stream_url_col < len(row):
+                stream['stream_url'] = row[stream_url_col].strip()
+            elif len(row) > 2:
+                stream['stream_url'] = row[2].strip()
+            else:
+                stream['stream_url'] = ''
+            
+            # Get location
+            if location_col is not None and location_col < len(row):
+                stream['location'] = row[location_col].strip()
+            elif len(row) > 3:  # Default to column 3 (index 3) for location
+                stream['location'] = row[3].strip()
+            else:
+                stream['location'] = ''
+            
+            # Get active status
+            if active_col is not None and active_col < len(row):
+                active_value = row[active_col].strip().lower()
+                stream['is_active'] = active_value in ['true', 'yes', '1', 'active', 'enabled']
+            else:
+                # Default to active if no active column
+                stream['is_active'] = True
+            
+            # Only include streams with at least a site name or stream name
+            if stream['site_name'] or stream['stream_name']:
+                stream['raw_data'] = row  # Include raw data for debugging
+                streams.append(stream)
+        
+        logger.info(f"Retrieved {len(streams)} streams from operations sheet {ops_sheet_id}")
+        
+        return jsonify({
+            'success': True,
+            'data': streams,
+            'count': len(streams),
+            'ops_sheet_id': ops_sheet_id,
+            'worksheet_name': site_info_worksheet.title,
+            'headers': values[0] if values else [],
+            'column_mapping': {
+                'site_name': site_name_col,
+                'stream_name': stream_name_col, 
+                'stream_url': stream_url_col,
+                'location': location_col,
+                'active': active_col
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting streams from operations sheet {ops_sheet_id}: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'ops_sheet_id': ops_sheet_id
+        }), 500
+
 if __name__ == '__main__':
     print("🚀 Starting GOLS Google Sheets Service...")
     print("📋 Available endpoints:")
     print("   GET  /health - Health check")
     print("   GET  /events - Get events list from File Cabinet")
+    print("   GET  /streams/<ops_sheet_id> - Get streams/sites from operations sheet")
     print("   GET  /operations/<ops_sheet_id> - Get operations data")
     print("   POST /operations/<ops_sheet_id>/start-time - Update actual start time")
     print("   GET  /debug/file-cabinet - Debug File Cabinet structure")

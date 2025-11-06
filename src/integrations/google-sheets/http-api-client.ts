@@ -15,6 +15,16 @@ export interface EventData {
     raw_data: Record<string, any>;
 }
 
+export interface StreamData {
+    site_name: string;
+    stream_name: string;
+    stream_url?: string;
+    location: string;
+    is_active: boolean;
+    raw_data: string[];
+    row_number: number;
+}
+
 export interface OperationsData {
     site_info: Record<string, any>[];
     master_schedule: Record<string, any>[];
@@ -167,6 +177,14 @@ export class HTTPGoogleSheetsClient {
      */
     async getEvents(): Promise<EventData[]> {
         const response = await this.makeRequest<EventData[]>('/events');
+        return response.data || [];
+    }
+
+    /**
+     * Get stream/site information for a specific operations sheet
+     */
+    async getStreams(opsSheetId: string): Promise<StreamData[]> {
+        const response = await this.makeRequest<StreamData[]>(`/streams/${opsSheetId}`);
         return response.data || [];
     }
 

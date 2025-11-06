@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Date/Location Population</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .controls { margin: 20px 0; }
+        select, input { padding: 8px; margin: 5px; min-width: 200px; }
+        .info-fields { margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 5px; }
+        .info-item { margin: 10px 0; }
+        .status { margin: 10px 0; padding: 10px; background: #e8f4f8; }
+    </style>
+</head>
+<body>
+    <h1>Date/Location Population Test</h1>
+    
+    <div class="controls">
+        <label>Event:</label><br>
+        <select id="event-select">
+            <option value="">Select event...</option>
+        </select>
+    </div>
+    
+    <div class="controls">
+        <label>Stream:</label><br>
+        <select id="stream-select">
+            <option value="">Select stream...</option>
+        </select>
+    </div>
+    
+    <div class="info-fields">
+        <h3>Game Info Fields</h3>
+        <div class="info-item">
+            <label>Date:</label><br>
+            <input type="text" id="game-date" value="MM/DD/YYYY" readonly>
+        </div>
+        <div class="info-item">
+            <label>Location:</label><br>
+            <input type="text" id="game-location" value="XXXXXXXXXXXXXXX" readonly>
+        </div>
+    </div>
+    
+    <div id="status" class="status">Select an event first</div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081';
+        let currentStreams = new Map();
+        
+        async function loadEvents() {
+            try {
+                const response = await fetch(`${API_BASE}/events`);
+                const data = await response.json();
+                
+                const eventSelect = document.getElementById('event-select');
+                eventSelect.innerHTML = '<option value="">Select event...</option>';
+                
+                data.data.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.ops_sheet_id;
+                    option.textContent = event.name;
+                    eventSelect.appendChild(option);
+                });
+                
+                document.getElementById('status').textContent = `Loaded ${data.data.length} events`;
+            } catch (error) {
+                document.getElementById('status').textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function loadStreams(opsSheetId) {
+            const status = document.getElementById('status');
+            const streamSelect = document.getElementById('stream-select');
+            
+            try {
+                status.textContent = 'Loading streams...';
+                streamSelect.innerHTML = '<option value="">Loading...</option>';
+                
+                const response = await fetch(`${API_BASE}/streams/${opsSheetId}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to load streams');
+                }
+                
+                // Clear and populate
+                streamSelect.innerHTML = '<option value="">Select stream...</option>';
+                currentStreams.clear();
+                
+                const uniqueStreams = new Map();
+                data.data.forEach(stream => {
+                    if (stream.stream_name && stream.stream_name !== 'CHANNEL' && stream.is_active) {
+                        uniqueStreams.set(stream.stream_name, stream);
+                    }
+                });
+                
+                // Store for later use
+                currentStreams = uniqueStreams;
+                
+                Array.from(uniqueStreams.values()).forEach(stream => {
+                    const option = document.createElement('option');
+                    option.value = stream.stream_name;
+                    option.textContent = `${stream.site_name} | ${stream.location}`;
+                    streamSelect.appendChild(option);
+                });
+                
+                status.textContent = `Loaded ${uniqueStreams.size} streams`;
+                
+            } catch (error) {
+                status.textContent = `Error loading streams: ${error.message}`;
+                streamSelect.innerHTML = '<option value="">Error loading streams</option>';
+            }
+        }
+        
+        function updateDateLocation(streamType) {
+            const dateField = document.getElementById('game-date');
+            const locationField = document.getElementById('game-location');
+            
+            if (!streamType) {
+                dateField.value = 'MM/DD/YYYY';
+                locationField.value = 'XXXXXXXXXXXXXXX';
+                document.getElementById('status').textContent = 'Cleared date and location fields';
+                return;
+            }
+            
+            const stream = currentStreams.get(streamType);
+            if (stream) {
+                dateField.value = stream.site_name || 'MM/DD/YYYY';
+                locationField.value = stream.location || 'XXXXXXXXXXXXXXX';
+                document.getElementById('status').textContent = `Updated: ${stream.site_name} | ${stream.location}`;
+            } else {
+                document.getElementById('status').textContent = `Stream data not found for: ${streamType}`;
+            }
+        }
+        
+        // Event handlers
+        document.getElementById('event-select').addEventListener('change', function(e) {
+            const opsSheetId = e.target.value;
+            if (opsSheetId) {
+                loadStreams(opsSheetId);
+            } else {
+                document.getElementById('stream-select').innerHTML = '<option value="">Select stream...</option>';
+                updateDateLocation('');
+                currentStreams.clear();
+            }
+        });
+        
+        document.getElementById('stream-select').addEventListener('change', function(e) {
+            updateDateLocation(e.target.value);
+        });
+        
+        // Load events on page load
+        document.addEventListener('DOMContentLoaded', loadEvents);
+    </script>
+</body>
+</html>

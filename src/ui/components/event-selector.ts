@@ -300,8 +300,12 @@ export class EventSelector {
       });
     }
 
-    // Emit event selection
+    // Emit event selection - emit both for compatibility
     this.eventManager.emit('event:selected', { eventId });
+    this.eventManager.emit('event:changed', { 
+      event: selectedEvent,
+      eventId: selectedEvent.id
+    });
   }
 
   private handleRefreshEvents(): void {

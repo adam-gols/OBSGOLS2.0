@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Stream Loading</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .controls { margin: 20px 0; }
+        select { padding: 8px; margin: 5px; }
+        .status { margin: 10px 0; padding: 10px; background: #f0f0f0; }
+        .streams { margin: 10px 0; }
+        .stream-item { padding: 5px; margin: 2px; background: #e0f0ff; }
+    </style>
+</head>
+<body>
+    <h1>Stream Loading Test</h1>
+    
+    <div class="controls">
+        <select id="event-select">
+            <option value="">Select event...</option>
+        </select>
+        <button onclick="loadStreams()">Load Streams</button>
+    </div>
+    
+    <div id="status" class="status">Ready</div>
+    
+    <div class="controls">
+        <label>Available Streams:</label>
+        <select id="stream-select">
+            <option value="">No streams loaded</option>
+        </select>
+    </div>
+    
+    <div id="streams" class="streams"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081';
+        
+        async function loadEvents() {
+            try {
+                const response = await fetch(`${API_BASE}/events`);
+                const data = await response.json();
+                
+                const eventSelect = document.getElementById('event-select');
+                eventSelect.innerHTML = '<option value="">Select event...</option>';
+                
+                data.data.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.ops_sheet_id;
+                    option.textContent = event.name;
+                    eventSelect.appendChild(option);
+                });
+                
+                document.getElementById('status').textContent = `Loaded ${data.data.length} events`;
+            } catch (error) {
+                document.getElementById('status').textContent = `Error loading events: ${error.message}`;
+            }
+        }
+        
+        async function loadStreams() {
+            const eventSelect = document.getElementById('event-select');
+            const opsSheetId = eventSelect.value;
+            
+            if (!opsSheetId) {
+                alert('Please select an event first');
+                return;
+            }
+            
+            const status = document.getElementById('status');
+            const streamSelect = document.getElementById('stream-select');
+            const streamsDiv = document.getElementById('streams');
+            
+            try {
+                status.textContent = 'Loading streams...';
+                streamSelect.innerHTML = '<option value="">Loading...</option>';
+                
+                const response = await fetch(`${API_BASE}/streams/${opsSheetId}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to load streams');
+                }
+                
+                // Clear previous results
+                streamSelect.innerHTML = '<option value="">Select stream...</option>';
+                streamsDiv.innerHTML = '';
+                
+                // Group by stream name
+                const uniqueStreams = new Map();
+                data.data.forEach(stream => {
+                    if (stream.stream_name && stream.stream_name !== 'CHANNEL') {
+                        uniqueStreams.set(stream.stream_name, stream);
+                    }
+                });
+                
+                // Populate dropdown
+                Array.from(uniqueStreams.values()).forEach(stream => {
+                    const option = document.createElement('option');
+                    option.value = stream.stream_name;
+                    // Display as "DATE | LOCATION"
+                    option.textContent = `${stream.site_name} | ${stream.location}`;
+                    streamSelect.appendChild(option);
+                    
+                    // Show stream details
+                    const streamDiv = document.createElement('div');
+                    streamDiv.className = 'stream-item';
+                    streamDiv.innerHTML = `
+                        <strong>${stream.stream_name}</strong>: ${stream.site_name} | ${stream.location}<br>
+                        <small>Row ${stream.row_number}, Active: ${stream.is_active}</small>
+                    `;
+                    streamsDiv.appendChild(streamDiv);
+                });
+                
+                status.textContent = `Loaded ${uniqueStreams.size} unique streams from ${data.data.length} total rows`;
+                
+            } catch (error) {
+                status.textContent = `Error loading streams: ${error.message}`;
+                console.error('Error:', error);
+            }
+        }
+        
+        // Load events on page load
+        document.addEventListener('DOMContentLoaded', loadEvents);
+    </script>
+</body>
+</html>
